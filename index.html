@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Interval Timer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #000000;
+            overflow: auto;
+            gap: 2vw;
+            padding: 2vw;
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: #000000;
+            padding: clamp(1rem, 2vw, 4rem);
+            border-radius: 2vw;
+            text-align: center;
+            width: 100%;
+            max-width: 90vw;
+            min-height: 50vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.5s ease-in-out;
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 600px) {
+            .container {
+                max-width: 60vw;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 40vw;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-2vw); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #inputScreen, #countdownScreen, #timerScreen {
+            display: none;
+        }
+
+        #inputScreen.active, #countdownScreen.active, #timerScreen.active {
+            display: block;
+        }
+
+        .timer-content {
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            color: #FFD700;
+            margin-bottom: clamp(1rem, 2vw, 2rem);
+            overflow-wrap: break-word;
+        }
+
+        .input-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: clamp(1rem, 2vw, 1.5rem) 0;
+        }
+
+        .input-table td {
+            padding: clamp(0.5rem, 1vw, 1rem);
+            text-align: left; /* Align all text to the left */
+            vertical-align: middle;
+            white-space: nowrap; /* Prevent wrapping to keep on one line */
+        }
+
+        .input-table label {
+            font-size: clamp(1.2rem, 2.5vw, 2rem);
+            color: #ffffff;
+            font-weight: bold;
+            padding-right: clamp(1rem, 2vw, 2rem);
+        }
+
+        .input-table input {
+            width: clamp(4rem, 8vw, 6rem);
+            padding: clamp(0.5rem, 1.5vw, 1rem);
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            font-family: 'Orbitron', sans-serif;
+            border: 2px solid #FFD700;
+            border-radius: 1rem;
+            text-align: center;
+            transition: border-color 0.3s;
+            background: #FFFFCC;
+            color: #000000;
+            box-sizing: border-box;
+        }
+
+        .input-table input:focus {
+            border-color: #FFD700;
+            outline: none;
+        }
+
+        .input-table .time-label {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: #ffffff;
+            padding-left: clamp(0.5rem, 1vw, 1rem);
+        }
+
+        button {
+            padding: clamp(0.5rem, 1.5vw, 1.4rem) clamp(1rem, 2.5vw, 3rem);
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            font-weight: 600;
+            font-family: 'Orbitron', sans-serif;
+            border: none;
+            border-radius: 2.5rem;
+            cursor: pointer;
+            margin: clamp(0.3rem, 1vw, 0.5rem);
+            transition: transform 0.2s;
+            box-sizing: border-box;
+            width: clamp(8rem, 15vw, 10rem);
+        }
+
+        button:hover {
+            transform: translateY(-0.2rem);
+        }
+
+        .button-primary {
+            background: #FFD700;
+            color: #000000;
+        }
+
+        .button-secondary {
+            background: #000000;
+            color: #FFD700;
+            border: 2px solid #FFD700;
+        }
+
+        .button-primary.pause {
+            background: #FFA500;
+        }
+
+        #countdown, #timer {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(5rem, 20vmin, 15rem);
+            font-weight: bold;
+            color: #FFD700;
+            margin: clamp(1rem, 2vw, 2rem) 0;
+            padding: clamp(0.5rem, 1vw, 1rem);
+            border-radius: 1rem;
+            box-sizing: border-box;
+            max-width: 100%;
+            white-space: nowrap;
+            text-align: center;
+            line-height: 1;
+        }
+
+        #timer.complete {
+            font-size: clamp(2rem, 8vw, 10rem);
+            display: block;
+        }
+
+        #timer.complete span {
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+        }
+
+        #status {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 800;
+            color: red;
+            text-transform: uppercase;
+            letter-spacing: 0.3rem;
+            margin-bottom: clamp(1rem, 2vw, 1.5rem);
+            transition: color 0.3s;
+        }
+
+        #status.rest {
+            color: green;
+        }
+
+        #roundDisplay {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            color: #FFD700;
+            font-weight: bold;
+            margin: clamp(0.5rem, 1vw, 1rem) 0;
+        }
+
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Input Screen -->
+        <div id="inputScreen" class="active">
+            <h1>Gym Interval Timer Setup</h1>
+            <table class="input-table">
+                <tr>
+                    <td><label>Workout Time</label></td>
+                    <td><input type="number" id="workMinutes" value="0" min="0" max="60" placeholder="min"></td>
+                    <td><span class="time-label">min</span></td>
+                    <td><input type="number" id="workSeconds" value="30" min="0" max="59" placeholder="sec"></td>
+                    <td><span class="time-label">sec</span></td>
+                </tr>
+                <tr>
+                    <td><label>Rest Time</label></td>
+                    <td><input type="number" id="restMinutes" value="0" min="0" max="60" placeholder="min"></td>
+                    <td><span class="time-label">min</span></td>
+                    <td><input type="number" id="restSeconds" value="15" min="0" max="59" placeholder="sec"></td>
+                    <td><span class="time-label">sec</span></td>
+                </tr>
+                <tr>
+                    <td><label>Rounds</label></td>
+                    <td><input type="number" id="rounds" value="10" min="1" max="99"></td>
+                    <td colspan="3"></td> <!-- Empty cells to maintain alignment -->
+                </tr>
+            </table>
+            <button id="goBtn" class="button-primary" onclick="startCountdown()">Go</button>
+        </div>
+
+        <!-- Countdown Screen -->
+        <div id="countdownScreen">
+            <div id="countdown">3</div>
+        </div>
+
+        <!-- Timer Screen -->
+        <div id="timerScreen">
+            <div class="timer-content">
+                <h1 id="timerHeading">Gym Interval Timer</h1>
+                <div id="status">Workout</div>
+                <div id="roundDisplay">0/0</div>
+                <div id="timer">00:00</div>
+            </div>
+            <div class="controls">
+                <button id="toggleBtn" class="button-primary" onclick="toggleTimer()">Start</button>
+                <button id="endBtn" class="button-secondary" onclick="endTimer()">End</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let workTime = 3; // in seconds, updated to match screenshot
+        let restTime = 1; // in seconds, updated to match screenshot
+        let rounds = 2;
+        let currentTime = workTime; // Remaining time in seconds
+        let isWorkPhase = true;
+        let currentRound = 0; // Tracks completed workout phases
+        let fullRounds = 0;   // Tracks completed full cycles (workout + rest)
+        let timerId = null;
+        let isRunning = false;
+        let isComplete = false;
+        let isPausedForTransition = false;
+
+        const inputScreen = document.getElementById('inputScreen');
+        const countdownScreen = document.getElementById('countdownScreen');
+        const timerScreen = document.getElementById('timerScreen');
+        const countdownDisplay = document.getElementById('countdown');
+        const timerDisplay = document.getElementById('timer');
+        const statusDisplay = document.getElementById('status');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const endBtn = document.getElementById('endBtn');
+        const roundDisplay = document.getElementById('roundDisplay');
+        const timerHeading = document.getElementById('timerHeading');
+        const workMinutesInput = document.getElementById('workMinutes');
+        const workSecondsInput = document.getElementById('workSeconds');
+        const restMinutesInput = document.getElementById('restMinutes');
+        const restSecondsInput = document.getElementById('restSeconds');
+        const roundsInput = document.getElementById('rounds');
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function enforceLimits(input, min, max) {
+            let value = parseInt(input.value) || 0;
+            value = Math.max(min, Math.min(max, value));
+            input.value = value;
+            return value;
+        }
+
+        function updateWorkTime() {
+            let minutes = enforceLimits(workMinutesInput, 0, 60);
+            let seconds = enforceLimits(workSecondsInput, 0, 59);
+            workTime = minutes * 60 + seconds;
+            if (workTime === 0) {
+                workSecondsInput.value = 1;
+                workTime = 1;
+            } else {
+                workTime = Math.min(3600, workTime);
+                if (workTime < minutes * 60 + seconds) {
+                    workMinutesInput.value = Math.floor(workTime / 60);
+                    workSecondsInput.value = workTime % 60;
+                }
+            }
+        }
+
+        function updateRestTime() {
+            let minutes = enforceLimits(restMinutesInput, 0, 60);
+            let seconds = enforceLimits(restSecondsInput, 0, 59);
+            restTime = minutes * 60 + seconds;
+            if (restTime === 0) {
+                restSecondsInput.value = 1;
+                restTime = 1;
+            } else {
+                restTime = Math.min(3600, restTime);
+                if (restTime < minutes * 60 + seconds) {
+                    restMinutesInput.value = Math.floor(restTime / 60);
+                    restSecondsInput.value = restTime % 60;
+                }
+            }
+        }
+
+        function updateRounds() {
+            rounds = enforceLimits(roundsInput, 1, 99);
+        }
+
+        workMinutesInput.addEventListener('input', updateWorkTime);
+        workSecondsInput.addEventListener('input', updateWorkTime);
+        restMinutesInput.addEventListener('input', updateRestTime);
+        restSecondsInput.addEventListener('input', updateRestTime);
+        roundsInput.addEventListener('input', updateRounds);
+
+        workMinutesInput.addEventListener('blur', updateWorkTime);
+        workSecondsInput.addEventListener('blur', updateWorkTime);
+        restMinutesInput.addEventListener('blur', updateRestTime);
+        restSecondsInput.addEventListener('blur', updateRestTime);
+        roundsInput.addEventListener('blur', updateRounds);
+
+        function playTone(frequency, duration) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function switchScreen(from, to) {
+            from.classList.remove('active');
+            to.classList.add('active');
+        }
+
+        function updateRoundDisplay() {
+            roundDisplay.textContent = `${currentRound}/${rounds}`;
+        }
+
+        function updateDisplay() {
+            const minutes = Math.floor(currentTime / 60);
+            const seconds = Math.floor(currentTime % 60);
+            if (!isComplete) {
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                timerDisplay.classList.remove('complete');
+                statusDisplay.textContent = isWorkPhase ? 'Workout' : 'Rest';
+                if (isWorkPhase) {
+                    statusDisplay.classList.remove('rest');
+                } else {
+                    statusDisplay.classList.add('rest');
+                }
+                toggleBtn.style.display = 'inline-block';
+                endBtn.style.display = 'inline-block';
+                timerHeading.style.display = 'none';
+            } else {
+                timerDisplay.innerHTML = '<span>Workout</span><span>Complete</span>';
+                timerDisplay.classList.add('complete');
+                statusDisplay.textContent = '';
+                toggleBtn.style.display = 'none';
+                endBtn.style.display = 'inline-block';
+                timerHeading.style.display = 'none';
+            }
+            updateRoundDisplay();
+        }
+
+        function startCountdown() {
+            updateWorkTime();
+            updateRestTime();
+            updateRounds();
+            currentTime = workTime;
+            currentRound = 0;
+            fullRounds = 0;
+            updateRoundDisplay();
+
+            switchScreen(inputScreen, countdownScreen);
+            let countdown = 3;
+            countdownDisplay.textContent = countdown;
+
+            const countdownInterval = setInterval(() => {
+                playTone(600, 0.2);
+                countdown--;
+                if (countdown > 0) {
+                    countdownDisplay.textContent = countdown;
+                } else {
+                    clearInterval(countdownInterval);
+                    switchScreen(countdownScreen, timerScreen);
+                    updateDisplay();
+                    startTimer();
+                }
+            }, 1000);
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            isRunning = true;
+            toggleBtn.textContent = '⏸';
+            toggleBtn.classList.add('pause');
+            timerDisplay.classList.add('pulse');
+
+            timerId = setInterval(() => {
+                if (!isRunning || isPausedForTransition) return;
+
+                currentTime--;
+                if (currentTime < 0) currentTime = 0; // Prevent negative time
+                updateDisplay();
+
+                if (currentTime <= 0) {
+                    isPausedForTransition = true;
+                    setTimeout(() => {
+                        if (isWorkPhase) {
+                            currentRound++; // Increment workout round counter
+                            updateRoundDisplay();
+                            isWorkPhase = false;
+                            currentTime = restTime;
+                            playTone(400, 0.3);
+                        } else {
+                            fullRounds++; // Increment full cycle counter after rest
+                            if (fullRounds >= rounds) {
+                                isComplete = true;
+                                pauseTimer();
+                                updateDisplay();
+                                return;
+                            }
+                            isWorkPhase = true;
+                            currentTime = workTime;
+                            playTone(800, 0.3);
+                        }
+                        isPausedForTransition = false;
+                        updateDisplay();
+                    }, 1000); // 1-second pause between phases
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (!isRunning) return;
+            clearInterval(timerId);
+            isRunning = false;
+            isPausedForTransition = false;
+            toggleBtn.textContent = '►';
+            toggleBtn.classList.remove('pause');
+            timerDisplay.classList.remove('pulse');
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function endTimer() {
+            pauseTimer();
+            currentTime = workTime;
+            isWorkPhase = true;
+            currentRound = 0;
+            fullRounds = 0;
+            isComplete = false;
+            updateRoundDisplay();
+            toggleBtn.style.display = 'inline-block';
+            endBtn.style.display = 'inline-block';
+            timerHeading.style.display = 'block';
+            updateDisplay();
+            switchScreen(timerScreen, inputScreen);
+        }
+
+        updateWorkTime();
+        updateRestTime();
+        updateRounds();
+        updateRoundDisplay();
+        updateDisplay();
+    </script>
+</body>
+</html>
