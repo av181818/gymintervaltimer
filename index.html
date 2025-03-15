@@ -162,6 +162,8 @@
             gap: clamp(0.5rem, 1vw, 2rem);
             margin-top: clamp(1rem, 2vw, 3rem);
             width: 100%;
+            flex-direction: column;
+            align-items: center;
         }
 
         button {
@@ -198,6 +200,7 @@
             background: var(--background-color);
             color: var(--primary-color);
             border: 2px solid var(--primary-color);
+            margin-top: clamp(0.5rem, 1vw, 1.5rem);
         }
 
         .button-primary.pause {
@@ -304,21 +307,21 @@
             <table class="input-table">
                 <tr>
                     <td><label>Workout Time</label></td>
-                    <td><input type="number" id="workMinutes" value="0" min="0" max="60" placeholder="min"></td>
+                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" id="workMinutes" value="0" placeholder="min"></td>
                     <td><span class="time-label">min</span></td>
-                    <td><input type="number" id="workSeconds" value="30" min="0" max="59" placeholder="sec"></td>
+                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" id="workSeconds" value="30" placeholder="sec"></td>
                     <td><span class="time-label">sec</span></td>
                 </tr>
                 <tr>
                     <td><label>Rest Time</label></td>
-                    <td><input type="number" id="restMinutes" value="0" min="0" max="60" placeholder="min"></td>
+                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" id="restMinutes" value="0" placeholder="min"></td>
                     <td><span class="time-label">min</span></td>
-                    <td><input type="number" id="restSeconds" value="15" min="0" max="59" placeholder="sec"></td>
+                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" id="restSeconds" value="15" placeholder="sec"></td>
                     <td><span class="time-label">sec</span></td>
                 </tr>
                 <tr>
                     <td><label>Rounds</label></td>
-                    <td><input type="number" id="rounds" value="10" min="1" max="99"></td>
+                    <td><input type="text" inputmode="numeric" pattern="[0-9]*" id="rounds" value="10" placeholder="rounds"></td>
                     <td colspan="3"></td>
                 </tr>
             </table>
@@ -346,7 +349,7 @@
     </div>
 
     <script>
-        // Default values
+        // Default values (minimum time is 3 seconds for both workout and rest)
         let workTime = 30;
         let restTime = 15;
         let rounds = 10;
@@ -388,9 +391,22 @@
         }
 
         function enforceLimits(input, min, max) {
+            // Allow empty input for better typing experience
+            if (input.value === '' || input.value === '-') {
+                return 0;
+            }
+            
             let value = parseInt(input.value) || 0;
-            value = Math.max(min, Math.min(max, value));
-            input.value = value;
+            
+            // Only enforce limits on blur or when starting the timer
+            if (value < min) value = min;
+            if (value > max) value = max;
+            
+            // Only update the input value if it's different to avoid cursor jumping
+            if (parseInt(input.value) !== value && !isNaN(value)) {
+                input.value = value;
+            }
+            
             return value;
         }
 
@@ -398,14 +414,18 @@
             let minutes = enforceLimits(workMinutesInput, 0, 60);
             let seconds = enforceLimits(workSecondsInput, 0, 59);
             workTime = minutes * 60 + seconds;
-            if (workTime === 0) {
-                workSecondsInput.value = 1;
-                workTime = 1;
-            } else {
-                workTime = Math.min(3600, workTime);
-                if (workTime < minutes * 60 + seconds) {
-                    workMinutesInput.value = Math.floor(workTime / 60);
-                    workSecondsInput.value = workTime % 60;
+            
+            // Only enforce minimum time on blur or when starting the timer
+            if (document.activeElement !== workMinutesInput && 
+                document.activeElement !== workSecondsInput && 
+                workTime < 3) {
+                // Set minimum time to 3 seconds
+                if (workTime === 0) {
+                    workSecondsInput.value = 3;
+                    workTime = 3;
+                } else if (workTime < 3) {
+                    workSecondsInput.value = 3;
+                    workTime = 3;
                 }
             }
         }
@@ -414,14 +434,18 @@
             let minutes = enforceLimits(restMinutesInput, 0, 60);
             let seconds = enforceLimits(restSecondsInput, 0, 59);
             restTime = minutes * 60 + seconds;
-            if (restTime === 0) {
-                restSecondsInput.value = 1;
-                restTime = 1;
-            } else {
-                restTime = Math.min(3600, restTime);
-                if (restTime < minutes * 60 + seconds) {
-                    restMinutesInput.value = Math.floor(restTime / 60);
-                    restSecondsInput.value = restTime % 60;
+            
+            // Only enforce minimum time on blur or when starting the timer
+            if (document.activeElement !== restMinutesInput && 
+                document.activeElement !== restSecondsInput && 
+                restTime < 3) {
+                // Set minimum time to 3 seconds
+                if (restTime === 0) {
+                    restSecondsInput.value = 3;
+                    restTime = 3;
+                } else if (restTime < 3) {
+                    restSecondsInput.value = 3;
+                    restTime = 3;
                 }
             }
         }
@@ -431,22 +455,49 @@
         }
 
         // Event listeners for input fields
-        workMinutesInput.addEventListener('input', updateWorkTime);
-        workSecondsInput.addEventListener('input', updateWorkTime);
-        restMinutesInput.addEventListener('input', updateRestTime);
-        restSecondsInput.addEventListener('input', updateRestTime);
-        roundsInput.addEventListener('input', updateRounds);
+        workMinutesInput.addEventListener('input', function(e) {
+            // Allow only numbers
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            updateWorkTime();
+        });
+        
+        workSecondsInput.addEventListener('input', function(e) {
+            // Allow only numbers
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            updateWorkTime();
+        });
+        
+        restMinutesInput.addEventListener('input', function(e) {
+            // Allow only numbers
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            updateRestTime();
+        });
+        
+        restSecondsInput.addEventListener('input', function(e) {
+            // Allow only numbers
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            updateRestTime();
+        });
+        
+        roundsInput.addEventListener('input', function(e) {
+            // Allow only numbers
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            updateRounds();
+        });
 
+        // Add focus event to select all text when clicking on an input
+        document.querySelectorAll('.input-table input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.select();
+            });
+        });
+
+        // Add blur event listeners to validate when tabbing out
         workMinutesInput.addEventListener('blur', updateWorkTime);
         workSecondsInput.addEventListener('blur', updateWorkTime);
         restMinutesInput.addEventListener('blur', updateRestTime);
         restSecondsInput.addEventListener('blur', updateRestTime);
         roundsInput.addEventListener('blur', updateRounds);
-
-        // Prevent default behavior for number inputs to avoid unwanted scrolling
-        document.querySelectorAll('input[type="number"]').forEach(input => {
-            input.addEventListener('wheel', e => e.preventDefault());
-        });
 
         function playTone(frequency, duration) {
             const context = initAudio();
@@ -466,6 +517,23 @@
             gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
             oscillator.start(context.currentTime);
             oscillator.stop(context.currentTime + duration);
+        }
+
+        // Play a more prominent end sound for interval completion
+        function playEndSound() {
+            // Play a sequence of tones to create a more noticeable sound
+            playTone(800, 0.15);
+            setTimeout(() => playTone(600, 0.15), 160);
+            setTimeout(() => playTone(800, 0.3), 320);
+        }
+
+        // Play a celebratory sound for workout completion
+        function playCompletionSound() {
+            // Play a more celebratory sequence for workout completion
+            playTone(800, 0.2);
+            setTimeout(() => playTone(1000, 0.2), 250);
+            setTimeout(() => playTone(1200, 0.2), 500);
+            setTimeout(() => playTone(1500, 0.4), 750);
         }
 
         function switchScreen(from, to) {
@@ -496,8 +564,9 @@
                 }
                 
                 toggleBtn.style.display = 'flex';
-                endBtn.style.display = 'flex';
+                endBtn.style.display = isRunning ? 'none' : 'flex';
                 timerHeading.style.display = 'none';
+                roundDisplay.style.display = 'block';
             } else {
                 timerDisplay.innerHTML = '<span>Workout</span><span>Complete</span>';
                 timerDisplay.classList.add('complete');
@@ -505,6 +574,7 @@
                 toggleBtn.style.display = 'none';
                 endBtn.style.display = 'flex';
                 timerHeading.style.display = 'none';
+                roundDisplay.style.display = 'none';
             }
             updateRoundDisplay();
         }
@@ -513,12 +583,35 @@
             // Initialize audio on user interaction
             initAudio();
             
+            // Final validation before starting
             updateWorkTime();
             updateRestTime();
             updateRounds();
+            
+            // Ensure values are within limits and displayed correctly
+            workMinutesInput.value = Math.floor(workTime / 60);
+            workSecondsInput.value = workTime % 60;
+            restMinutesInput.value = Math.floor(restTime / 60);
+            restSecondsInput.value = restTime % 60;
+            roundsInput.value = rounds;
+            
+            // Ensure minimum values of 3 seconds
+            if (workTime < 3) {
+                workSecondsInput.value = 3;
+                workTime = 3;
+            }
+            
+            if (restTime < 3) {
+                restSecondsInput.value = 3;
+                restTime = 3;
+            }
+            
             currentTime = workTime;
             currentRound = 0;
             fullRounds = 0;
+            isComplete = false;
+            isRunning = false; // Ensure timer is not running initially
+            roundDisplay.style.display = 'block';
             updateRoundDisplay();
 
             switchScreen(inputScreen, countdownScreen);
@@ -545,6 +638,7 @@
             toggleBtn.textContent = 'Pause';
             toggleBtn.classList.add('pause');
             timerDisplay.classList.add('pulse');
+            endBtn.style.display = 'none';
 
             timerId = setInterval(() => {
                 if (!isRunning || isPausedForTransition) return;
@@ -559,6 +653,9 @@
                 }
 
                 if (currentTime <= 0) {
+                    // Play end sound when timer reaches 00:00
+                    playEndSound();
+                    
                     isPausedForTransition = true;
                     setTimeout(() => {
                         if (isWorkPhase) {
@@ -566,20 +663,22 @@
                             updateRoundDisplay();
                             isWorkPhase = false;
                             currentTime = restTime;
-                            playTone(400, 0.3);
+                            // No need for additional tone here since we have the end sound
                         } else {
                             fullRounds++;
                             if (fullRounds >= rounds) {
                                 isComplete = true;
                                 pauseTimer();
-                                playTone(600, 0.5);
-                                setTimeout(() => playTone(800, 0.5), 600);
+                                // Play a final completion sound
+                                setTimeout(() => {
+                                    playCompletionSound();
+                                }, 500);
                                 updateDisplay();
                                 return;
                             }
                             isWorkPhase = true;
                             currentTime = workTime;
-                            playTone(800, 0.3);
+                            // No need for additional tone here since we have the end sound
                         }
                         isPausedForTransition = false;
                         updateDisplay();
@@ -596,6 +695,8 @@
             toggleBtn.textContent = 'Resume';
             toggleBtn.classList.remove('pause');
             timerDisplay.classList.remove('pulse');
+            endBtn.style.display = 'flex';
+            updateDisplay();
         }
 
         function toggleTimer() {
@@ -617,6 +718,7 @@
             toggleBtn.style.display = 'flex';
             endBtn.style.display = 'flex';
             timerHeading.style.display = 'block';
+            roundDisplay.style.display = 'block';
             toggleBtn.textContent = 'Start';
             updateDisplay();
             switchScreen(timerScreen, inputScreen);
