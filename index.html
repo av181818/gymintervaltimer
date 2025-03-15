@@ -6,6 +6,21 @@
     <title>Gym Interval Timer</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #FFD700;
+            --secondary-color: #FFA500;
+            --background-color: #000000;
+            --text-color: #ffffff;
+            --workout-color: #ff3333;
+            --rest-color: #33cc33;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Orbitron', sans-serif;
             display: flex;
@@ -13,16 +28,15 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background: #000000;
+            background: var(--background-color);
             overflow: auto;
             gap: 2vw;
             padding: 2vw;
-            color: #ffffff;
-            box-sizing: border-box;
+            color: var(--text-color);
         }
 
         .container {
-            background: #000000;
+            background: var(--background-color);
             padding: clamp(0.5rem, 2vw, 4rem);
             border-radius: 2vw;
             text-align: center;
@@ -34,13 +48,20 @@
             justify-content: space-between;
             align-items: center;
             animation: fadeIn 0.5s ease-in-out;
-            box-sizing: border-box;
         }
 
         @media (max-width: 600px) {
             .container {
                 max-width: 100vw;
                 padding: clamp(0.5rem, 1.5vw, 2rem);
+            }
+            
+            .input-table td {
+                padding: clamp(0.2rem, 0.5vw, 0.8rem);
+            }
+            
+            .input-table label {
+                font-size: clamp(0.8rem, 1.5vw, 1.5rem);
             }
         }
 
@@ -63,10 +84,14 @@
 
         #inputScreen, #countdownScreen, #timerScreen {
             display: none;
+            width: 100%;
         }
 
         #inputScreen.active, #countdownScreen.active, #timerScreen.active {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .timer-content {
@@ -81,9 +106,10 @@
 
         h1 {
             font-size: clamp(1.2rem, 2.5vw, 2.5rem);
-            color: #FFD700;
+            color: var(--primary-color);
             margin-bottom: clamp(0.8rem, 2vw, 2rem);
             overflow-wrap: break-word;
+            text-align: center;
         }
 
         .input-table {
@@ -101,7 +127,7 @@
 
         .input-table label {
             font-size: clamp(1rem, 2vw, 2rem);
-            color: #ffffff;
+            color: var(--text-color);
             font-weight: bold;
             padding-right: clamp(0.5rem, 1.5vw, 2rem);
         }
@@ -111,27 +137,36 @@
             padding: clamp(0.3rem, 1vw, 1rem);
             font-size: clamp(0.9rem, 1.5vw, 1.5rem);
             font-family: 'Orbitron', sans-serif;
-            border: 2px solid #FFD700;
+            border: 2px solid var(--primary-color);
             border-radius: 1rem;
             text-align: center;
             transition: border-color 0.3s;
             background: #FFFFCC;
             color: #000000;
-            box-sizing: border-box;
         }
 
         .input-table input:focus {
-            border-color: #FFD700;
+            border-color: var(--primary-color);
             outline: none;
         }
 
         .input-table .time-label {
             font-size: clamp(0.9rem, 1.5vw, 1.5rem);
-            color: #ffffff;
+            color: var(--text-color);
             padding-left: clamp(0.3rem, 0.8vw, 1rem);
         }
 
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: clamp(0.5rem, 1vw, 2rem);
+            margin-top: clamp(1rem, 2vw, 3rem);
+            width: 100%;
+        }
+
         button {
+            min-width: clamp(6rem, 12vw, 10rem);
+            min-height: clamp(2.5rem, 5vh, 4rem);
             padding: clamp(0.4rem, 1vw, 1.4rem) clamp(0.8rem, 2vw, 3rem);
             font-size: clamp(0.9rem, 1.5vw, 1.5rem);
             font-weight: 600;
@@ -140,39 +175,43 @@
             border-radius: 2.5rem;
             cursor: pointer;
             margin: clamp(0.2rem, 0.8vw, 0.5rem);
-            transition: transform 0.2s;
-            box-sizing: border-box;
-            width: clamp(6rem, 12vw, 10rem);
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         button:hover {
             transform: translateY(-0.2rem);
         }
 
+        button:active {
+            transform: translateY(0);
+        }
+
         .button-primary {
-            background: #FFD700;
+            background: var(--primary-color);
             color: #000000;
         }
 
         .button-secondary {
-            background: #000000;
-            color: #FFD700;
-            border: 2px solid #FFD700;
+            background: var(--background-color);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
         }
 
         .button-primary.pause {
-            background: #FFA500;
+            background: var(--secondary-color);
         }
 
         #countdown, #timer {
             font-family: 'Orbitron', sans-serif;
             font-size: clamp(4rem, 18vmin, 15rem);
             font-weight: bold;
-            color: #FFD700;
+            color: var(--primary-color);
             margin: clamp(0.8rem, 2vw, 2rem);
             padding: clamp(0.4rem, 1vw, 1rem);
             border-radius: 1rem;
-            box-sizing: border-box;
             max-width: 100%;
             white-space: nowrap;
             text-align: center;
@@ -188,14 +227,14 @@
             display: block;
             font-family: 'Orbitron', sans-serif;
             font-weight: bold;
-            color: #FFD700;
+            color: var(--primary-color);
             text-align: center;
         }
 
         #status {
             font-size: clamp(1.5rem, 4vw, 4rem);
             font-weight: 800;
-            color: red;
+            color: var(--workout-color);
             text-transform: uppercase;
             letter-spacing: 0.3rem;
             margin-bottom: clamp(0.8rem, 2vw, 1.5rem);
@@ -203,12 +242,12 @@
         }
 
         #status.rest {
-            color: green;
+            color: var(--rest-color);
         }
 
         #roundDisplay {
             font-size: clamp(1.2rem, 2.5vw, 2.5rem);
-            color: #FFD700;
+            color: var(--primary-color);
             font-weight: bold;
             margin: clamp(0.4rem, 1vw, 1rem);
         }
@@ -221,6 +260,39 @@
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
+        }
+
+        /* Touch-friendly improvements */
+        @media (pointer: coarse) {
+            button {
+                min-height: clamp(3rem, 6vh, 5rem);
+                padding: clamp(0.6rem, 1.5vw, 1.8rem) clamp(1rem, 2.5vw, 3.5rem);
+            }
+            
+            .input-table input {
+                min-height: clamp(2.5rem, 5vh, 4rem);
+            }
+        }
+
+        /* Landscape mode adjustments */
+        @media (orientation: landscape) and (max-height: 600px) {
+            .container {
+                min-height: 90vh;
+            }
+            
+            #timer {
+                font-size: clamp(3rem, 12vmin, 10rem);
+                margin: clamp(0.4rem, 1vw, 1rem);
+            }
+            
+            #status {
+                font-size: clamp(1.2rem, 3vw, 3rem);
+                margin-bottom: clamp(0.4rem, 1vw, 0.8rem);
+            }
+            
+            .controls {
+                margin-top: clamp(0.5rem, 1vw, 1.5rem);
+            }
         }
     </style>
 </head>
@@ -274,9 +346,10 @@
     </div>
 
     <script>
-        let workTime = 3;
-        let restTime = 1;
-        let rounds = 2;
+        // Default values
+        let workTime = 30;
+        let restTime = 15;
+        let rounds = 10;
         let currentTime = workTime;
         let isWorkPhase = true;
         let currentRound = 0;
@@ -285,7 +358,9 @@
         let isRunning = false;
         let isComplete = false;
         let isPausedForTransition = false;
+        let lastBeepTime = 0;
 
+        // DOM elements
         const inputScreen = document.getElementById('inputScreen');
         const countdownScreen = document.getElementById('countdownScreen');
         const timerScreen = document.getElementById('timerScreen');
@@ -301,7 +376,16 @@
         const restMinutesInput = document.getElementById('restMinutes');
         const restSecondsInput = document.getElementById('restSeconds');
         const roundsInput = document.getElementById('rounds');
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Initialize audio context only when needed to avoid autoplay restrictions
+        let audioContext = null;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
 
         function enforceLimits(input, min, max) {
             let value = parseInt(input.value) || 0;
@@ -346,6 +430,7 @@
             rounds = enforceLimits(roundsInput, 1, 99);
         }
 
+        // Event listeners for input fields
         workMinutesInput.addEventListener('input', updateWorkTime);
         workSecondsInput.addEventListener('input', updateWorkTime);
         restMinutesInput.addEventListener('input', updateRestTime);
@@ -358,17 +443,29 @@
         restSecondsInput.addEventListener('blur', updateRestTime);
         roundsInput.addEventListener('blur', updateRounds);
 
+        // Prevent default behavior for number inputs to avoid unwanted scrolling
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('wheel', e => e.preventDefault());
+        });
+
         function playTone(frequency, duration) {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            const context = initAudio();
+            const now = Date.now();
+            
+            // Prevent too many beeps in quick succession
+            if (now - lastBeepTime < 100) return;
+            lastBeepTime = now;
+            
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
             oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+            gainNode.connect(context.destination);
             oscillator.type = 'sine';
             oscillator.frequency.value = frequency;
-            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + duration);
+            gainNode.gain.setValueAtTime(0.5, context.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
+            oscillator.start(context.currentTime);
+            oscillator.stop(context.currentTime + duration);
         }
 
         function switchScreen(from, to) {
@@ -380,33 +477,42 @@
             roundDisplay.textContent = `${currentRound}/${rounds}`;
         }
 
+        function formatTimeDisplay(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
         function updateDisplay() {
-            const minutes = Math.floor(currentTime / 60);
-            const seconds = Math.floor(currentTime % 60);
             if (!isComplete) {
-                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                timerDisplay.textContent = formatTimeDisplay(currentTime);
                 timerDisplay.classList.remove('complete');
                 statusDisplay.textContent = isWorkPhase ? 'Workout' : 'Rest';
+                
                 if (isWorkPhase) {
                     statusDisplay.classList.remove('rest');
                 } else {
                     statusDisplay.classList.add('rest');
                 }
-                toggleBtn.style.display = 'inline-block';
-                endBtn.style.display = 'inline-block';
+                
+                toggleBtn.style.display = 'flex';
+                endBtn.style.display = 'flex';
                 timerHeading.style.display = 'none';
             } else {
                 timerDisplay.innerHTML = '<span>Workout</span><span>Complete</span>';
                 timerDisplay.classList.add('complete');
                 statusDisplay.textContent = '';
                 toggleBtn.style.display = 'none';
-                endBtn.style.display = 'inline-block';
+                endBtn.style.display = 'flex';
                 timerHeading.style.display = 'none';
             }
             updateRoundDisplay();
         }
 
         function startCountdown() {
+            // Initialize audio on user interaction
+            initAudio();
+            
             updateWorkTime();
             updateRestTime();
             updateRounds();
@@ -436,7 +542,7 @@
         function startTimer() {
             if (isRunning) return;
             isRunning = true;
-            toggleBtn.textContent = '| |';
+            toggleBtn.textContent = 'Pause';
             toggleBtn.classList.add('pause');
             timerDisplay.classList.add('pulse');
 
@@ -446,6 +552,11 @@
                 currentTime--;
                 if (currentTime < 0) currentTime = 0;
                 updateDisplay();
+
+                // Play warning beep for last 3 seconds
+                if (currentTime <= 3 && currentTime > 0) {
+                    playTone(700, 0.1);
+                }
 
                 if (currentTime <= 0) {
                     isPausedForTransition = true;
@@ -461,6 +572,8 @@
                             if (fullRounds >= rounds) {
                                 isComplete = true;
                                 pauseTimer();
+                                playTone(600, 0.5);
+                                setTimeout(() => playTone(800, 0.5), 600);
                                 updateDisplay();
                                 return;
                             }
@@ -480,7 +593,7 @@
             clearInterval(timerId);
             isRunning = false;
             isPausedForTransition = false;
-            toggleBtn.textContent = 'Play';
+            toggleBtn.textContent = 'Resume';
             toggleBtn.classList.remove('pause');
             timerDisplay.classList.remove('pulse');
         }
@@ -501,13 +614,22 @@
             fullRounds = 0;
             isComplete = false;
             updateRoundDisplay();
-            toggleBtn.style.display = 'inline-block';
-            endBtn.style.display = 'inline-block';
+            toggleBtn.style.display = 'flex';
+            endBtn.style.display = 'flex';
             timerHeading.style.display = 'block';
+            toggleBtn.textContent = 'Start';
             updateDisplay();
             switchScreen(timerScreen, inputScreen);
         }
 
+        // Handle visibility change to pause timer when tab is not visible
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isRunning) {
+                pauseTimer();
+            }
+        });
+
+        // Initialize the app
         updateWorkTime();
         updateRestTime();
         updateRounds();
