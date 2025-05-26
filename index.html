@@ -207,6 +207,21 @@
             background: var(--secondary-color);
         }
 
+        .support-button {
+            margin-top: clamp(1rem, 2vw, 2rem);
+            text-align: center;
+        }
+
+        .support-button img {
+            height: 35px !important;
+            width: 125px !important;
+            transition: transform 0.2s;
+        }
+
+        .support-button img:hover {
+            transform: scale(1.05);
+        }
+
         #countdown, #timer {
             font-family: 'Orbitron', sans-serif;
             font-size: clamp(4rem, 18vmin, 15rem);
@@ -326,6 +341,11 @@
                 </tr>
             </table>
             <button id="goBtn" class="button-primary" onclick="startCountdown()">Go</button>
+            <div id="supportButtonInput" class="support-button">
+                <a href="https://www.buymeacoffee.com/av18" target="_blank">
+                    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 35px !important;width: 125px !important">
+                </a>
+            </div>
         </div>
 
         <!-- Countdown Screen -->
@@ -344,6 +364,11 @@
             <div class="controls">
                 <button id="toggleBtn" class="button-primary" onclick="toggleTimer()">Start</button>
                 <button id="endBtn" class="button-secondary" onclick="endTimer()">End</button>
+            </div>
+            <div id="supportButtonTimer" class="support-button" style="display: none;">
+                <a href="https://www.buymeacoffee.com/av18" target="_blank">
+                    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 35px !important;width: 125px !important">
+                </a>
             </div>
         </div>
     </div>
@@ -379,6 +404,8 @@
         const restMinutesInput = document.getElementById('restMinutes');
         const restSecondsInput = document.getElementById('restSeconds');
         const roundsInput = document.getElementById('rounds');
+        const supportButtonInput = document.getElementById('supportButtonInput');
+        const supportButtonTimer = document.getElementById('supportButtonTimer');
         
         // Initialize audio context only when needed to avoid autoplay restrictions
         let audioContext = null;
@@ -567,6 +594,7 @@
                 endBtn.style.display = isRunning ? 'none' : 'flex';
                 timerHeading.style.display = 'none';
                 roundDisplay.style.display = 'block';
+                supportButtonTimer.style.display = 'none';
             } else {
                 timerDisplay.innerHTML = '<span>Workout</span><span>Complete</span>';
                 timerDisplay.classList.add('complete');
@@ -575,6 +603,7 @@
                 endBtn.style.display = 'flex';
                 timerHeading.style.display = 'none';
                 roundDisplay.style.display = 'none';
+                supportButtonTimer.style.display = 'block';
             }
             updateRoundDisplay();
         }
@@ -719,6 +748,7 @@
             endBtn.style.display = 'flex';
             timerHeading.style.display = 'block';
             roundDisplay.style.display = 'block';
+            supportButtonTimer.style.display = 'none';
             toggleBtn.textContent = 'Start';
             updateDisplay();
             switchScreen(timerScreen, inputScreen);
